@@ -21,21 +21,20 @@ public class UserService {
     private final Gson gson;
     private final HttpHeaders headers;
     private String sacredKey = "";
-    private final String uri = "http://91.241.64.178:7081/api/users";
     private final Type type = new TypeToken<List<User>>() {}.getType();
     private List<User> listUser;
     List<String> setCookies;
 
 
     @Autowired
-    public UserService(RestTemplate restTemplate, Gson gson, HttpHeaders headers) {
+    public UserService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.gson = gson;
-        this.headers = headers;
+        this.gson = new Gson();
+        this.headers = new HttpHeaders();
     }
 
     public void setUserAndCookies(){
-        ResponseEntity<String> forEntity = restTemplate.getForEntity(uri, String.class);
+        ResponseEntity<String> forEntity = restTemplate.getForEntity("", String.class);
         listUser = gson.fromJson(forEntity.getBody(), type);
         setCookies = forEntity.getHeaders().get("Set-Cookie");
     }
@@ -45,7 +44,7 @@ public class UserService {
         headers.set("Cookie", setCookies.get(0));
         headers.set("Content-Type", "application/json");
         HttpEntity<String> entity = new HttpEntity<String>(gson.toJson(listUser.get(2)),headers);
-        ResponseEntity<String> forEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> forEntity = restTemplate.exchange("", HttpMethod.POST, entity, String.class);
         sacredKey = sacredKey + forEntity.getBody();
     }
 
@@ -53,13 +52,13 @@ public class UserService {
         listUser.get(2).setName("Thomas");
         listUser.get(2).setLastName("Shelby");
         HttpEntity<String> entity2 = new HttpEntity<String>(gson.toJson(listUser.get(2)),headers);
-        ResponseEntity<String> forEntity = restTemplate.exchange(uri, HttpMethod.PUT, entity2, String.class);
+        ResponseEntity<String> forEntity = restTemplate.exchange("", HttpMethod.PUT, entity2, String.class);
         sacredKey = sacredKey + forEntity.getBody();
     }
 
     public void setSacredKeyThree() {
         HttpEntity<String> entity3 = new HttpEntity<String>(headers);
-        ResponseEntity<String> forEntity = restTemplate.exchange(uri + "/3", HttpMethod.DELETE, entity3, String.class);
+        ResponseEntity<String> forEntity = restTemplate.exchange("/3", HttpMethod.DELETE, entity3, String.class);
         sacredKey = sacredKey + forEntity.getBody();
     }
 
